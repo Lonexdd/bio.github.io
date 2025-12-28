@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Panel | Lonex</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Снежинки на заднем фоне */
+        .snowflakes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .snowflake {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+        
+        /* Заблюренный фон */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 900px;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-radius: 15px;
+            background-color: rgba(15, 23, 42, 0.85);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .owner-info {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .owner-info i {
+            color: #3b82f6;
+        }
+        
+        .title {
+            text-align: center;
+            font-size: 2.2rem;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+        
+        .music-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .volume-slider {
+            width: 120px;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 5px;
+            background: #475569;
+            outline: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #60a5fa;
+            cursor: pointer;
+        }
+        
+        .volume-icon {
+            color: #60a5fa;
+            font-size: 1.3rem;
+        }
+        
+        .main-panel {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .user-panel {
+            flex: 3;
+            background-color: rgba(15, 23, 42, 0.85);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 500px;
+        }
+        
+        .panel-title {
+            font-size: 1.8rem;
+            color: #e2e8f0;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .users-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .user-item {
+            background-color: rgba(30, 41, 59, 0.9);
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.3s, opacity 0.5s;
+            animation: fadeIn 0.5s ease-out;
+            opacity: 1;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .user-item.fade-out {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        
+        .user-icon {
+            font-size: 1.8rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(15, 23, 42, 0.9);
+            flex-shrink: 0;
+        }
+        
+        .desktop-icon { color: #60a5fa; }
+        .android-icon { color: #10b981; }
+        .ios-icon { color: #8b5cf6; }
+        
+        .user-details {
+            flex-grow: 1;
+        }
+        
+        .user-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .user-device {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .user-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: 10px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .online {
+            background-color: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+        }
+        
+        .offline {
+            background-color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
+        .connect-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+            white-space: nowrap;
+        }
+        
+        .connect-btn:hover {
+            background-color: #0da271;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+        }
+        
+        .connect-btn:active {
+            transform: translateY(0);
+        }
+        
+        .connect-btn:disabled {
+            background-color: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .side-panel {
+            flex: 1;
+            background-color: rgba(15, 23, 42, 0.85);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .stats-container {
+            background-color: rgba(30, 41, 59, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .stats-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #60a5fa;
+            text-align: center;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .stat-label {
+            color: #94a3b8;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 20px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .discord-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #5865F2;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(88, 101, 242, 0.3);
+        }
+        
+        .discord-button:hover {
+            transform: translateY(-3px);
+            background-color: #4752c4;
+            box-shadow: 0 6px 15px rgba(88, 101, 242, 0.4);
+        }
+        
+        .discord-button i {
+            font-size: 1.5rem;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(239, 68, 68, 0.95);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.5s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .main-panel {
+                flex-direction: column;
+            }
+            
+            .title {
+                font-size: 1.8rem;
+            }
+            
+            .owner-info {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .user-panel, .side-panel {
+                padding: 20px 15px;
+            }
+            
+            .user-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .user-status {
+                margin-left: 0;
+                justify-content: center;
+            }
+            
+            .user-details {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Снежинки -->
+    <div class="snowflakes" id="snowflakes"></div>
+    
+    <div class="container">
+        <header class="header">
+            <div class="owner-info">
+                <i class="fas fa-crown"></i>
+                <span>Owner: Lonex</span>
+            </div>
+            <h1 class="title">User Connections Panel</h1>
+            <div class="music-controls">
+                <i class="fas fa-volume-up volume-icon"></i>
+                <input type="range" min="0" max="100" value="50" class="volume-slider" id="volumeSlider">
+            </div>
+        </header>
+        
+        <div class="main-panel">
+            <div class="user-panel">
+                <h2 class="panel-title">Connected Users</h2>
+                <div class="users-list" id="usersList">
+                    <!-- Пользователи будут добавляться сюда -->
+                </div>
+            </div>
+            
+            <div class="side-panel">
+                <div class="stats-container">
+                    <h3 class="stats-title">System Stats</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Online Users:</span>
+                        <span class="stat-value" id="onlineCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Devices:</span>
+                        <span class="stat-value" id="totalCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Last Update:</span>
+                        <span class="stat-value" id="lastUpdate">Just now</span>
+                    </div>
+                </div>
+                
+                <div class="footer">
+                    <a href="https://discordapp.com/users/548684258827567125" target="_blank" class="discord-button">
+                        <i class="fab fa-discord"></i> Discord
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-exclamation-circle"></i> No admin
+    </div>
+    
+    <audio id="backgroundMusic" loop>
+        <!-- В реальном проекте здесь будет ссылка на kazax.mp3 -->
+        <source src="https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио элемент.
+    </audio>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Элементы
+            const usersList = document.getElementById('usersList');
+            const notification = document.getElementById('notification');
+            const backgroundMusic = document.getElementById('backgroundMusic');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const onlineCount = document.getElementById('onlineCount');
+            const totalCount = document.getElementById('totalCount');
+            const lastUpdate = document.getElementById('lastUpdate');
+            const snowflakesContainer = document.getElementById('snowflakes');
+            
+            // Создание снежинок
+            function createSnowflakes() {
+                const snowflakeCount = 50;
+                
+                for (let i = 0; i < snowflakeCount; i++) {
+                    const snowflake = document.createElement('div');
+                    snowflake.classList.add('snowflake');
+                    
+                    // Случайный размер
+                    const size = Math.random() * 5 + 3;
+                    snowflake.style.width = `${size}px`;
+                    snowflake.style.height = `${size}px`;
+                    
+                    // Случайная позиция
+                    snowflake.style.left = `${Math.random() * 100}%`;
+                    snowflake.style.top = `${Math.random() * 100}%`;
+                    
+                    // Случайная прозрачность
+                    snowflake.style.opacity = Math.random() * 0.7 + 0.3;
+                    
+                    // Анимация
+                    const duration = Math.random() * 10 + 10;
+                    snowflake.style.animation = `fall ${duration}s linear infinite`;
+                    
+                    // Добавление стилей для анимации
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes fall {
+                            0% {
+                                transform: translateY(-100px) rotate(0deg);
+                                opacity: ${Math.random() * 0.7 + 0.3};
+                            }
+                            100% {
+                                transform: translateY(100vh) rotate(360deg);
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    snowflakesContainer.appendChild(snowflake);
+                }
+            }
+            
+            // Начать воспроизведение музыки
+            backgroundMusic.volume = volumeSlider.value / 100;
+            backgroundMusic.play().catch(e => {
+                console.log("Автовоспроизведение заблокировано. Пользователь должен взаимодействовать со страницей.");
+            });
+            
+            // Управление громкостью
+            volumeSlider.addEventListener('input', function() {
+                backgroundMusic.volume = this.value / 100;
+            });
+            
+            // Данные пользователей
+            const userTypes = [
+                { type: 'desktop', icon: 'fas fa-desktop', iconClass: 'desktop-icon', namePrefix: 'Desktop' },
+                { type: 'android', icon: 'fab fa-android', iconClass: 'android-icon', namePrefix: 'Android' },
+                { type: 'ios', icon: 'fab fa-apple', iconClass: 'ios-icon', namePrefix: 'iOS' }
+            ];
+            
+            // Генерация случайных имен пользователей
+            const fakeNames = [
+                'Alex', 'Max', 'Sam', 'Jordan', 'Taylor', 'Casey', 'Riley', 'Morgan', 'Dragon', 'Phoenix',
+                'Shadow', 'Neo', 'Cyber', 'Byte', 'Vector', 'Matrix', 'Python', 'Java', 'Cobra', 'Viper',
+                'Ghost', 'Wolf', 'Eagle', 'Falcon', 'Hawk', 'Raven', 'Storm', 'Blaze', 'Frost', 'Thunder'
+            ];
+            
+            // Генерация случайных пользователей
+            function generateRandomUser() {
+                const userType = userTypes[Math.floor(Math.random() * userTypes.length)];
+                const name = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+                const randomNum = Math.floor(Math.random() * 1000);
+                const isOnline = Math.random() > 0.4; // 60% шанс быть онлайн
+                
+                return {
+                    id: Date.now() + Math.random(),
+                    name: `${name}${randomNum}`,
+                    device: userType.namePrefix,
+                    icon: userType.icon,
+                    iconClass: userType.iconClass,
+                    status: isOnline ? 'online' : 'offline'
+                };
+            }
+            
+            // Создание начальных пользователей
+            let users = [];
+            for (let i = 0; i < 8; i++) {
+                users.push(generateRandomUser());
+            }
+            
+            // Обновление статистики
+            function updateStats() {
+                const onlineUsers = users.filter(user => user.status === 'online').length;
+                onlineCount.textContent = onlineUsers;
+                totalCount.textContent = users.length;
+                lastUpdate.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+            
+            // Отображение пользователей
+            function renderUsers() {
+                usersList.innerHTML = '';
+                users.forEach(user => {
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-item';
+                    userItem.dataset.id = user.id;
+                    
+                    userItem.innerHTML = `
+                        <div class="user-icon ${user.iconClass}">
+                            <i class="${user.icon}"></i>
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name">${user.name}</div>
+                            <div class="user-device">
+                                <i class="fas fa-${user.type === 'desktop' ? 'desktop' : 'mobile-alt'}"></i>
+                                ${user.device}
+                            </div>
+                        </div>
+                        <div class="user-status">
+                            <div class="status-indicator ${user.status === 'online' ? 'online' : 'offline'}"></div>
+                            <button class="connect-btn" data-id="${user.id}">
+                                Connect
+                            </button>
+                        </div>
+                    `;
+                    
+                    usersList.appendChild(userItem);
+                });
+                
+                // Добавляем обработчики для кнопок Connect
+                document.querySelectorAll('.connect-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const userId = this.dataset.id;
+                        showNotification();
+                        
+                        // Визуальная обратная связь для кнопки
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting';
+                        this.disabled = true;
+                        
+                        setTimeout(() => {
+                            this.innerHTML = 'Connect';
+                            this.disabled = false;
+                        }, 2000);
+                    });
+                });
+                
+                updateStats();
+            }
+            
+            // Анимация смены пользователей
+            function updateRandomUser() {
+                // Выбираем случайного пользователя для обновления
+                const randomIndex = Math.floor(Math.random() * users.length);
+                
+                // Анимация исчезновения
+                const userItem = document.querySelector(`.user-item[data-id="${users[randomIndex].id}"]`);
+                if (userItem) {
+                    userItem.classList.add('fade-out');
+                    
+                    setTimeout(() => {
+                        // Заменяем пользователя
+                        users[randomIndex] = generateRandomUser();
+                        renderUsers();
+                    }, 300);
+                }
+            }
+            
+            // Показать уведомление
+            function showNotification() {
+                notification.classList.add('show');
+                
+                // Скрыть уведомление через 3 секунды
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Инициализация
+            createSnowflakes();
+            renderUsers();
+            
+            // Обновление пользователей каждые 3 секунды
+            setInterval(updateRandomUser, 3000);
+            
+            // Автопрокрутка фоновой музыки при взаимодействии с пользователем
+            document.addEventListener('click', function() {
+                if (backgroundMusic.paused) {
+                    backgroundMusic.play().catch(e => console.log("Воспроизведение заблокировано"));
+                }
+            }, { once: true });
+        });
+    </script>
+</body>
+</html>
