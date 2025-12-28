@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель пользователей</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), url('walpp.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .owner-info {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+        }
+        
+        .owner-info h2 {
+            font-size: 1.5rem;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        
+        .owner-info .left {
+            color: #FF9800;
+        }
+        
+        .owner-info .right {
+            color: #2196F3;
+        }
+        
+        .panel {
+            background-color: rgba(20, 25, 35, 0.85);
+            border-radius: 15px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-header {
+            background: linear-gradient(90deg, #1a237e, #283593);
+            padding: 20px 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        
+        .panel-header p {
+            color: #bbdefb;
+            font-size: 1rem;
+        }
+        
+        .users-container {
+            padding: 20px;
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .user-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px;
+            margin-bottom: 15px;
+            background-color: rgba(30, 35, 45, 0.7);
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+            transition: transform 0.3s, opacity 0.3s;
+            animation: slideIn 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .user-card.offline {
+            border-left-color: #f44336;
+        }
+        
+        .user-card.changing {
+            animation: changeUser 0.8s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes changeUser {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            50% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-icon {
+            font-size: 1.8rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        .desktop .user-icon {
+            background-color: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+        
+        .android .user-icon {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+        
+        .ios .user-icon {
+            background-color: rgba(158, 158, 158, 0.2);
+            color: #9e9e9e;
+        }
+        
+        .user-details h3 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+        
+        .user-details .device {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .user-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+        
+        .online {
+            background-color: #4CAF50;
+            box-shadow: 0 0 10px #4CAF50;
+        }
+        
+        .offline-status {
+            background-color: #f44336;
+            box-shadow: 0 0 10px #f44336;
+        }
+        
+        .connect-btn {
+            background: linear-gradient(90deg, #FF9800, #FF5722);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 87, 34, 0.4);
+        }
+        
+        .connect-btn:active {
+            transform: translateY(0);
+        }
+        
+        .discord-link {
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #5865F2;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .discord-link:hover {
+            background-color: #4752c4;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(88, 101, 242, 0.4);
+        }
+        
+        .music-controls {
+            background-color: rgba(30, 35, 45, 0.8);
+            padding: 15px 25px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .music-controls h3 {
+            color: #FF9800;
+            font-size: 1.2rem;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .volume-icon {
+            color: #4CAF50;
+            font-size: 1.2rem;
+        }
+        
+        input[type="range"] {
+            flex-grow: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #f44336;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .footer {
+            text-align: center;
+            color: #aaa;
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                gap: 20px;
+            }
+            
+            .panel-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .user-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .user-status {
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .owner-info {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">No admin</div>
+    
+    <div class="container">
+        <div class="owner-info">
+            <div class="left">
+                <h2>Owner: Lonex</h2>
+            </div>
+            <div class="right">
+                <h2>User Panel</h2>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <div class="panel-header">
+                <h1><i class="fas fa-users"></i> Система пользователей</h1>
+                <p>Мониторинг активности в реальном времени</p>
+            </div>
+            
+            <div class="users-container" id="usersContainer">
+                <!-- Сюда будут добавляться пользователи через JavaScript -->
+            </div>
+        </div>
+        
+        <div class="music-controls">
+            <h3><i class="fas fa-music"></i> Музыкальный плеер</h3>
+            <div class="volume-control">
+                <i class="fas fa-volume-down volume-icon"></i>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5">
+                <i class="fas fa-volume-up volume-icon"></i>
+            </div>
+            <p>Трек: Kazax.mp3</p>
+        </div>
+        
+        <a href="https://discordapp.com/users/548684258827567125" class="discord-link" target="_blank">
+            <i class="fab fa-discord"></i> Discord профиль
+        </a>
+        
+        <div class="footer">
+            Панель автоматически обновляет пользователей каждые 3 секунды
+        </div>
+    </div>
+    
+    <audio id="backgroundMusic" loop>
+        <source src="kazax.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио элемент.
+    </audio>
+    
+    <script>
+        // Фейковые пользователи
+        const fakeUsers = [
+            { name: "Dekstop_User", device: "desktop", online: true },
+            { name: "Android_Player", device: "android", online: true },
+            { name: "iOS_User", device: "ios", online: false },
+            { name: "Windows_Client", device: "desktop", online: true },
+            { name: "Mobile_User", device: "android", online: true },
+            { name: "iPhone_User", device: "ios", online: false },
+            { name: "PC_Master", device: "desktop", online: true },
+            { name: "Tablet_User", device: "android", online: false },
+            { name: "iPad_User", device: "ios", online: true },
+            { name: "Laptop_User", device: "desktop", online: false }
+        ];
+        
+        // Элементы DOM
+        const usersContainer = document.getElementById('usersContainer');
+        const notification = document.getElementById('notification');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const volumeSlider = document.getElementById('volumeSlider');
+        
+        // Установка громкости
+        backgroundMusic.volume = volumeSlider.value;
+        volumeSlider.addEventListener('input', () => {
+            backgroundMusic.volume = volumeSlider.value;
+        });
+        
+        // Автовоспроизведение музыки (с обработкой политики браузера)
+        document.addEventListener('click', () => {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play().catch(e => console.log("Автовоспроизведение заблокировано браузером"));
+            }
+        }, { once: true });
+        
+        // Инициализация пользователей
+        let currentUsers = [];
+        
+        function getRandomUsers(count) {
+            const shuffled = [...fakeUsers].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+        
+        function renderUsers() {
+            usersContainer.innerHTML = '';
+            
+            currentUsers.forEach((user, index) => {
+                const userCard = document.createElement('div');
+                userCard.className = `user-card ${user.device} ${user.online ? '' : 'offline'}`;
+                
+                // Иконка в зависимости от устройства
+                let iconClass = 'fas fa-desktop';
+                if (user.device === 'android') iconClass = 'fab fa-android';
+                if (user.device === 'ios') iconClass = 'fab fa-apple';
+                
+                userCard.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-icon">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="user-details">
+                            <h3>${user.name}</h3>
+                            <p class="device">${user.device === 'desktop' ? 'Desktop' : 
+                                user.device === 'android' ? 'Android' : 'iOS'}</p>
+                        </div>
+                    </div>
+                    <div class="user-status">
+                        <div class="status-indicator ${user.online ? 'online' : 'offline-status'}"></div>
+                        <button class="connect-btn" data-index="${index}">Connect</button>
+                    </div>
+                `;
+                
+                usersContainer.appendChild(userCard);
+            });
+            
+            // Добавляем обработчики для кнопок Connect
+            document.querySelectorAll('.connect-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showNotification();
+                });
+            });
+        }
+        
+        function updateUsers() {
+            // Добавляем анимацию смены
+            document.querySelectorAll('.user-card').forEach(card => {
+                card.classList.add('changing');
+            });
+            
+            // Через небольшой промежуток обновляем пользователей
+            setTimeout(() => {
+                currentUsers = getRandomUsers(5);
+                renderUsers();
+            }, 400);
+        }
+        
+        function showNotification() {
+            notification.textContent = "No admin";
+            notification.style.display = 'block';
+            notification.style.backgroundColor = '#f44336';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 2000);
+        }
+        
+        // Инициализация
+        currentUsers = getRandomUsers(5);
+        renderUsers();
+        
+        // Обновление пользователей каждые 3 секунды
+        setInterval(updateUsers, 3000);
+        
+        // Периодическое изменение статуса пользователей
+        setInterval(() => {
+            // Случайно меняем статус одного из пользователей
+            if (currentUsers.length > 0) {
+                const randomIndex = Math.floor(Math.random() * currentUsers.length);
+                currentUsers[randomIndex].online = !currentUsers[randomIndex].online;
+                renderUsers();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
