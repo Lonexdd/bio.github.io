@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lonex Search</title>
+    <title>Lonex Scan</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         * {
@@ -242,15 +242,15 @@
             box-shadow: 0 0 20px rgba(0, 102, 255, 0.5);
         }
 
-        /* Новый дизайн кнопок: черные с зеленой обводкой */
+        /* Новый дизайн кнопок: синий фон без обводки со свечением */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            background-color: #000000;
-            color: #00ff00;
-            border: 2px solid #00cc66;
+            background: linear-gradient(135deg, #0066ff, #0088ff);
+            color: #ffffff;
+            border: none;
             padding: 16px 30px;
             font-size: 1.1rem;
             font-weight: 600;
@@ -259,15 +259,13 @@
             transition: all 0.3s;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            box-shadow: 0 5px 15px rgba(0, 204, 102, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 102, 255, 0.5);
         }
 
         .btn:hover {
             transform: translateY(-3px);
-            background-color: #111111;
-            border-color: #00ff00;
-            box-shadow: 0 8px 25px rgba(0, 255, 0, 0.5);
-            color: #ffffff;
+            background: linear-gradient(135deg, #0088ff, #00aaff);
+            box-shadow: 0 8px 30px rgba(0, 102, 255, 0.8);
         }
 
         .btn:active {
@@ -275,26 +273,21 @@
         }
 
         .btn:disabled {
-            background-color: #222;
-            border-color: #666;
-            color: #666;
+            background: linear-gradient(135deg, #444, #666);
+            color: #888;
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .btn-export {
-            background-color: #000000;
-            border: 2px solid #00cc66;
-            color: #00cc66;
-            box-shadow: 0 5px 15px rgba(0, 204, 102, 0.3);
+            background: linear-gradient(135deg, #00aa33, #00cc66);
+            box-shadow: 0 5px 20px rgba(0, 204, 102, 0.5);
         }
 
         .btn-export:hover {
-            background-color: #111111;
-            border-color: #00ff00;
-            color: #ffffff;
-            box-shadow: 0 8px 25px rgba(0, 255, 0, 0.6);
+            background: linear-gradient(135deg, #00cc66, #00ee88);
+            box-shadow: 0 8px 30px rgba(0, 204, 102, 0.8);
         }
 
         .buttons {
@@ -519,7 +512,7 @@
                         Перетащите файл сюда или кликните для выбора
                     </label>
                     <input type="file" id="fileInput" accept=".txt" style="display: none;">
-                    <p style="color: #888; margin-top: 15px;">Поддерживаются только .txt файлы</p>
+                    <p style="color: #888; margin-top: 15px;">t.me/scanceo</p>
                 </div>
                 <div class="file-info" id="fileInfo">
                     Файл не выбран
@@ -530,15 +523,7 @@
                         <div class="stat-label">Всего строк</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value" id="statWords">0</div>
-                        <div class="stat-label">Всего слов</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="statChars">0</div>
-                        <div class="stat-label">Всего символов</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="statSize">0 KB</div>
+                        <div class="stat-value" id="statSize">0 MB</div>
                         <div class="stat-label">Размер файла</div>
                     </div>
                 </div>
@@ -580,21 +565,9 @@
                         </div>
                         <div class="info-item">
                             <span class="info-label">
-                                <i class="fas fa-font info-icon"></i> Количество слов
-                            </span>
-                            <span class="info-value" id="infoFileWords">0</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">
-                                <i class="fas fa-keyboard info-icon"></i> Количество символов
-                            </span>
-                            <span class="info-value" id="infoFileChars">0</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">
                                 <i class="fas fa-weight-hanging info-icon"></i> Размер файла
                             </span>
-                            <span class="info-value" id="infoFileSize">0 KB</span>
+                            <span class="info-value" id="infoFileSize">0 MB</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">
@@ -636,7 +609,7 @@
         </section>
 
         <footer>
-            <p>Сайт сделал изначально для себя но мб кому то пригодиться в поисках логов PS:Lonex</p>
+            <p>Сайт был сделан для себя но мб кому то поможет в поисках логов PS: Lonex</p>
         </footer>
     </div>
 
@@ -657,18 +630,14 @@
         const searchTime = document.getElementById('searchTime');
         const matchesCount = document.getElementById('matchesCount');
         
-        // Элементы статистики
+        // Элементы статистики (только строки и размер)
         const statLines = document.getElementById('statLines');
-        const statWords = document.getElementById('statWords');
-        const statChars = document.getElementById('statChars');
         const statSize = document.getElementById('statSize');
         
         // Элементы панели информации
         const fileInfoPanel = document.getElementById('fileInfoPanel');
         const infoFileName = document.getElementById('infoFileName');
         const infoFileLines = document.getElementById('infoFileLines');
-        const infoFileWords = document.getElementById('infoFileWords');
-        const infoFileChars = document.getElementById('infoFileChars');
         const infoFileSize = document.getElementById('infoFileSize');
         const infoLoadTime = document.getElementById('infoLoadTime');
 
@@ -677,14 +646,12 @@
         let searchResults = [];
         let fileStatsData = {
             lines: 0,
-            words: 0,
-            chars: 0,
             size: 0,
             fileName: '',
             loadTime: ''
         };
 
-        // Создание снежинок - исправленная версия
+        // Создание снежинок
         function createSnowflakes() {
             const snowflakesContainer = document.getElementById('snowflakes-container');
             const snowflakeCount = 80;
@@ -764,9 +731,7 @@
         function updateFileInfoPanel() {
             infoFileName.textContent = fileStatsData.fileName || '-';
             infoFileLines.textContent = fileStatsData.lines.toLocaleString();
-            infoFileWords.textContent = fileStatsData.words.toLocaleString();
-            infoFileChars.textContent = fileStatsData.chars.toLocaleString();
-            infoFileSize.textContent = `${(fileStatsData.size / 1024).toFixed(2)} KB`;
+            infoFileSize.textContent = `${(fileStatsData.size / (1024 * 1024)).toFixed(3)} MB`;
             infoLoadTime.textContent = fileStatsData.loadTime;
             
             // Показываем панель информации
@@ -779,8 +744,6 @@
             
             fileStatsData = {
                 lines: 0,
-                words: 0,
-                chars: 0,
                 size: fileSize,
                 fileName: fileName,
                 loadTime: ''
@@ -790,30 +753,8 @@
             const lines = content.split('\n');
             fileStatsData.lines = lines.length;
             
-            // Считаем слова и символы
-            let totalWords = 0;
-            let totalChars = 0;
-            
-            // Упрощаем процесс без async/await
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                totalChars += line.length;
-                
-                // Разделяем строку на слова
-                const words = line.trim().split(/\s+/).filter(word => word.length > 0);
-                totalWords += words.length;
-                
-                // Обновляем индикатор загрузки каждые 1000 строк (для производительности)
-                if (i % 1000 === 0) {
-                    scannedLine.textContent = `Просканировано строк: ${i} из ${lines.length}`;
-                }
-            }
-            
             // Финальное обновление
             scannedLine.textContent = `Просканировано строк: ${lines.length} из ${lines.length}`;
-            
-            fileStatsData.words = totalWords;
-            fileStatsData.chars = totalChars;
             
             // Время загрузки
             const endTime = Date.now();
@@ -828,9 +769,7 @@
         // Обновление статистики файла
         function updateFileStats() {
             statLines.textContent = fileStatsData.lines.toLocaleString();
-            statWords.textContent = fileStatsData.words.toLocaleString();
-            statChars.textContent = fileStatsData.chars.toLocaleString();
-            statSize.textContent = `${(fileStatsData.size / 1024).toFixed(2)} KB`;
+            statSize.textContent = `${(fileStatsData.size / (1024 * 1024)).toFixed(3)} MB`;
             
             fileStats.style.display = 'grid';
         }
@@ -846,7 +785,7 @@
             loadingIndicator.style.display = 'flex';
             loadingText.textContent = 'Анализ файла...';
             
-            fileInfo.innerHTML = `<i class="fas fa-file-alt"></i> <strong>${file.name}</strong> (${(file.size / 1024).toFixed(2)} KB)`;
+            fileInfo.innerHTML = `<i class="fas fa-file-alt"></i> <strong>${file.name}</strong> (${(file.size / (1024 * 1024)).toFixed(3)} MB)`;
             
             const reader = new FileReader();
             
@@ -980,7 +919,7 @@
             resultsContainer.scrollTop = 0;
         }
 
-        // Экспорт результатов в файл
+        // Экспорт результатов в файл (без количества слов и символов, с мегабайтами)
         function exportResults() {
             if (searchResults.length === 0) {
                 alert('Нет результатов для экспорта');
@@ -999,9 +938,7 @@
             exportContent += `Имя файла: ${fileStatsData.fileName}\n`;
             exportContent += `Искомое слово/фраза: "${searchInput.value.trim()}"\n`;
             exportContent += `Всего строк в файле: ${fileStatsData.lines}\n`;
-            exportContent += `Всего слов в файле: ${fileStatsData.words}\n`;
-            exportContent += `Всего символов в файле: ${fileStatsData.chars}\n`;
-            exportContent += `Размер файла: ${(fileStatsData.size / 1024).toFixed(2)} KB\n`;
+            exportContent += `Размер файла: ${(fileStatsData.size / (1024 * 1024)).toFixed(3)} MB\n`;
             exportContent += `Время анализа файла: ${fileStatsData.loadTime}\n\n`;
             exportContent += `========================================\n`;
             exportContent += `РЕЗУЛЬТАТЫ ПОИСКА\n`;
