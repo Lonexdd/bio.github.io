@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализатор текстовых файлов</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0f;
+            color: #f0f0f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Снежинки на фоне - исправлено для непрерывного потока */
+        #snowflakes-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .snowflake {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) translateX(0px);
+            }
+            100% {
+                transform: translateY(100vh) translateX(20px);
+            }
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #0066ff, #00ccff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(0, 102, 255, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .upload-section, .search-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: rgba(20, 20, 30, 0.8);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 102, 255, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: #00aaff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            font-size: 1.8rem;
+        }
+
+        .file-drop-area {
+            border: 2px dashed rgba(0, 102, 255, 0.5);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            margin-bottom: 25px;
+            cursor: pointer;
+            position: relative;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .file-drop-area:hover {
+            border-color: #0066ff;
+            box-shadow: 0 0 20px rgba(0, 102, 255, 0.3);
+            background-color: rgba(0, 102, 255, 0.05);
+        }
+
+        .file-drop-area.dragover {
+            border-color: #00ccff;
+            background-color: rgba(0, 102, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 102, 255, 0.5);
+        }
+
+        .file-input-label {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #f0f0f0;
+        }
+
+        .file-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: #aaa;
+        }
+
+        .file-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background-color: rgba(0, 102, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 3px solid #0066ff;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #00ccff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .loading-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(10, 10, 15, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            z-index: 10;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 102, 255, 0.2);
+            border-top: 5px solid #0066ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.1rem;
+            color: #00ccff;
+            text-align: center;
+        }
+
+        .scanned-line {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 10px;
+        }
+
+        .search-box {
+            margin-bottom: 25px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 20px;
+            background-color: rgba(10, 15, 30, 0.8);
+            border: 2px solid rgba(0, 102, 255, 0.4);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #0066ff;
+            box-shadow: 0 0 20px rgba(0, 102, 255, 0.5);
+        }
+
+        /* Новый дизайн кнопок: черные с зеленой обводкой */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: #000000;
+            color: #00ff00;
+            border: 2px solid #00cc66;
+            padding: 16px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 5px 15px rgba(0, 204, 102, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            background-color: #111111;
+            border-color: #00ff00;
+            box-shadow: 0 8px 25px rgba(0, 255, 0, 0.5);
+            color: #ffffff;
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background-color: #222;
+            border-color: #666;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-export {
+            background-color: #000000;
+            border: 2px solid #00cc66;
+            color: #00cc66;
+            box-shadow: 0 5px 15px rgba(0, 204, 102, 0.3);
+        }
+
+        .btn-export:hover {
+            background-color: #111111;
+            border-color: #00ff00;
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(0, 255, 0, 0.6);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        /* Панель информации о файле в правой секции */
+        .file-info-panel {
+            background-color: rgba(10, 15, 30, 0.8);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid rgba(0, 102, 255, 0.3);
+        }
+
+        .info-panel-title {
+            font-size: 1.3rem;
+            color: #00ccff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-label {
+            color: #aaa;
+            font-size: 0.95rem;
+        }
+
+        .info-value {
+            color: #00ccff;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .info-icon {
+            color: #00ccff;
+            margin-right: 8px;
+        }
+
+        .results-section {
+            background-color: rgba(20, 20, 30, 0.8);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 102, 255, 0.2);
+            margin-top: 10px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .results-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background-color: rgba(0, 102, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .stat-badge i {
+            color: #00ccff;
+        }
+
+        .results-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .result-item {
+            background-color: rgba(10, 15, 30, 0.8);
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #0066ff;
+            transition: all 0.3s;
+        }
+
+        .result-item:hover {
+            background-color: rgba(15, 25, 50, 0.9);
+            transform: translateX(5px);
+        }
+
+        .result-line {
+            margin-bottom: 8px;
+            color: #f0f0f0;
+            line-height: 1.5;
+        }
+
+        .result-number {
+            color: #00ccff;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .highlight {
+            background-color: rgba(0, 102, 255, 0.3);
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: #00ccff;
+            font-weight: bold;
+        }
+
+        .empty-results {
+            text-align: center;
+            padding: 50px 20px;
+            color: #777;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Полоса прокрутки */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(20, 20, 30, 0.8);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0066ff;
+            border-radius: 10px;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .file-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <!-- Иконочный шрифт для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Снежинки на фоне -->
+    <div id="snowflakes-container"></div>
+
+    <div class="container">
+        <header>
+            <h1>Анализатор текстовых файлов</h1>
+            <p class="subtitle">Загрузите текстовый файл, проанализируйте его содержимое и найдите нужные слова</p>
+        </header>
+
+        <div class="app-container">
+            <section class="upload-section">
+                <h2 class="section-title">
+                    <i class="fas fa-file-upload"></i> Загрузка файла
+                </h2>
+                <div class="file-drop-area" id="dropArea">
+                    <div class="loading-indicator" id="loadingIndicator">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text" id="loadingText">Загрузка файла...</div>
+                        <div class="scanned-line" id="scannedLine"></div>
+                    </div>
+                    <label class="file-input-label">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; margin-bottom: 15px; color: #0066ff;"></i>
+                        <br>
+                        Перетащите файл сюда или кликните для выбора
+                    </label>
+                    <input type="file" id="fileInput" accept=".txt" style="display: none;">
+                    <p style="color: #888; margin-top: 15px;">Поддерживаются только .txt файлы</p>
+                </div>
+                <div class="file-info" id="fileInfo">
+                    Файл не выбран
+                </div>
+                <div class="file-stats" id="fileStats" style="display: none;">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statLines">0</div>
+                        <div class="stat-label">Всего строк</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statWords">0</div>
+                        <div class="stat-label">Всего слов</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statChars">0</div>
+                        <div class="stat-label">Всего символов</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statSize">0 KB</div>
+                        <div class="stat-label">Размер файла</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="search-section">
+                <h2 class="section-title">
+                    <i class="fas fa-search"></i> Поиск слова
+                </h2>
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Введите слово или фразу для поиска...">
+                </div>
+                <div class="buttons">
+                    <button id="searchBtn" class="btn" disabled>
+                        <i class="fas fa-search"></i> Найти слово
+                    </button>
+                    <button id="exportBtn" class="btn btn-export" disabled>
+                        <i class="fas fa-download"></i> Экспорт результатов
+                    </button>
+                </div>
+                
+                <!-- Панель информации о файле -->
+                <div class="file-info-panel" id="fileInfoPanel" style="display: none;">
+                    <h3 class="info-panel-title">
+                        <i class="fas fa-info-circle"></i> Информация о файле
+                    </h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-file-alt info-icon"></i> Имя файла
+                            </span>
+                            <span class="info-value" id="infoFileName">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-hashtag info-icon"></i> Количество строк
+                            </span>
+                            <span class="info-value" id="infoFileLines">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-font info-icon"></i> Количество слов
+                            </span>
+                            <span class="info-value" id="infoFileWords">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-keyboard info-icon"></i> Количество символов
+                            </span>
+                            <span class="info-value" id="infoFileChars">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-weight-hanging info-icon"></i> Размер файла
+                            </span>
+                            <span class="info-value" id="infoFileSize">0 KB</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-clock info-icon"></i> Время загрузки
+                            </span>
+                            <span class="info-value" id="infoLoadTime">-</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="results-section">
+            <div class="results-header">
+                <h2 class="section-title">
+                    <i class="fas fa-list"></i> Результаты поиска
+                </h2>
+                <div class="results-stats">
+                    <div class="stat-badge">
+                        <i class="fas fa-file-alt"></i>
+                        <span id="resultsCount">Найдено: 0</span>
+                    </div>
+                    <div class="stat-badge">
+                        <i class="fas fa-clock"></i>
+                        <span id="searchTime">Время: 0 мс</span>
+                    </div>
+                    <div class="stat-badge">
+                        <i class="fas fa-chart-bar"></i>
+                        <span id="matchesCount">Совпадений: 0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="results-container" id="resultsContainer">
+                <div class="empty-results">
+                    <i class="fas fa-file-alt" style="font-size: 3rem; margin-bottom: 15px; color: #444;"></i>
+                    <p>Загрузите файл и введите слово для поиска</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Анализатор текстовых файлов &copy; 2023 | Минималистичный дизайн с темной темой и анимацией снежинок</p>
+        </footer>
+    </div>
+
+    <script>
+        // Элементы DOM
+        const fileInput = document.getElementById('fileInput');
+        const dropArea = document.getElementById('dropArea');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileStats = document.getElementById('fileStats');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const loadingText = document.getElementById('loadingText');
+        const scannedLine = document.getElementById('scannedLine');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const resultsCount = document.getElementById('resultsCount');
+        const searchTime = document.getElementById('searchTime');
+        const matchesCount = document.getElementById('matchesCount');
+        
+        // Элементы статистики
+        const statLines = document.getElementById('statLines');
+        const statWords = document.getElementById('statWords');
+        const statChars = document.getElementById('statChars');
+        const statSize = document.getElementById('statSize');
+        
+        // Элементы панели информации
+        const fileInfoPanel = document.getElementById('fileInfoPanel');
+        const infoFileName = document.getElementById('infoFileName');
+        const infoFileLines = document.getElementById('infoFileLines');
+        const infoFileWords = document.getElementById('infoFileWords');
+        const infoFileChars = document.getElementById('infoFileChars');
+        const infoFileSize = document.getElementById('infoFileSize');
+        const infoLoadTime = document.getElementById('infoLoadTime');
+
+        // Переменные для хранения данных
+        let fileContent = '';
+        let searchResults = [];
+        let fileStatsData = {
+            lines: 0,
+            words: 0,
+            chars: 0,
+            size: 0,
+            fileName: '',
+            loadTime: ''
+        };
+
+        // Создание снежинок - исправленная версия
+        function createSnowflakes() {
+            const snowflakesContainer = document.getElementById('snowflakes-container');
+            const snowflakeCount = 80;
+            
+            // Очищаем контейнер
+            snowflakesContainer.innerHTML = '';
+            
+            for (let i = 0; i < snowflakeCount; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                
+                // Размер от 2 до 6 пикселей
+                const size = Math.random() * 4 + 2;
+                snowflake.style.width = `${size}px`;
+                snowflake.style.height = `${size}px`;
+                
+                // Случайная позиция по горизонтали
+                snowflake.style.left = `${Math.random() * 100}vw`;
+                
+                // Случайная начальная позиция по вертикали
+                snowflake.style.top = `${Math.random() * -100}px`;
+                
+                // Разная скорость падения
+                const duration = Math.random() * 10 + 5;
+                snowflake.style.animationDuration = `${duration}s`;
+                
+                // Случайная задержка
+                snowflake.style.animationDelay = `${Math.random() * 5}s`;
+                
+                // Легкое боковое движение
+                snowflake.style.opacity = Math.random() * 0.7 + 0.3;
+                
+                snowflakesContainer.appendChild(snowflake);
+            }
+            
+            // Запускаем цикл создания новых снежинок
+            setInterval(() => {
+                // Проверяем сколько снежинок сейчас есть
+                const currentSnowflakes = snowflakesContainer.querySelectorAll('.snowflake').length;
+                if (currentSnowflakes < snowflakeCount) {
+                    // Создаем недостающие снежинки
+                    for (let i = 0; i < snowflakeCount - currentSnowflakes; i++) {
+                        addSnowflake();
+                    }
+                }
+            }, 2000);
+        }
+
+        // Добавление одной снежинки
+        function addSnowflake() {
+            const snowflakesContainer = document.getElementById('snowflakes-container');
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            
+            const size = Math.random() * 4 + 2;
+            snowflake.style.width = `${size}px`;
+            snowflake.style.height = `${size}px`;
+            snowflake.style.left = `${Math.random() * 100}vw`;
+            snowflake.style.top = `${Math.random() * -100}px`;
+            snowflake.style.opacity = Math.random() * 0.7 + 0.3;
+            
+            const duration = Math.random() * 10 + 5;
+            snowflake.style.animationDuration = `${duration}s`;
+            snowflake.style.animationDelay = `${Math.random() * 5}s`;
+            
+            snowflakesContainer.appendChild(snowflake);
+            
+            // Удаляем снежинку после завершения анимации
+            setTimeout(() => {
+                if (snowflake.parentNode === snowflakesContainer) {
+                    snowflakesContainer.removeChild(snowflake);
+                }
+            }, (duration + 5) * 1000);
+        }
+
+        // Обновление панели информации о файле
+        function updateFileInfoPanel() {
+            infoFileName.textContent = fileStatsData.fileName || '-';
+            infoFileLines.textContent = fileStatsData.lines.toLocaleString();
+            infoFileWords.textContent = fileStatsData.words.toLocaleString();
+            infoFileChars.textContent = fileStatsData.chars.toLocaleString();
+            infoFileSize.textContent = `${(fileStatsData.size / 1024).toFixed(2)} KB`;
+            infoLoadTime.textContent = fileStatsData.loadTime;
+            
+            // Показываем панель информации
+            fileInfoPanel.style.display = 'block';
+        }
+
+        // Анализ файла для сбора статистики
+        function analyzeFile(content, fileName, fileSize) {
+            const startTime = Date.now();
+            
+            fileStatsData = {
+                lines: 0,
+                words: 0,
+                chars: 0,
+                size: fileSize,
+                fileName: fileName,
+                loadTime: ''
+            };
+            
+            // Считаем строки
+            const lines = content.split('\n');
+            fileStatsData.lines = lines.length;
+            
+            // Считаем слова и символы
+            let totalWords = 0;
+            let totalChars = 0;
+            
+            // Упрощаем процесс без async/await
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                totalChars += line.length;
+                
+                // Разделяем строку на слова
+                const words = line.trim().split(/\s+/).filter(word => word.length > 0);
+                totalWords += words.length;
+                
+                // Обновляем индикатор загрузки каждые 1000 строк (для производительности)
+                if (i % 1000 === 0) {
+                    scannedLine.textContent = `Просканировано строк: ${i} из ${lines.length}`;
+                }
+            }
+            
+            // Финальное обновление
+            scannedLine.textContent = `Просканировано строк: ${lines.length} из ${lines.length}`;
+            
+            fileStatsData.words = totalWords;
+            fileStatsData.chars = totalChars;
+            
+            // Время загрузки
+            const endTime = Date.now();
+            const loadTimeMs = endTime - startTime;
+            fileStatsData.loadTime = `${loadTimeMs} мс`;
+            
+            // Обновляем статистику на странице
+            updateFileStats();
+            updateFileInfoPanel();
+        }
+
+        // Обновление статистики файла
+        function updateFileStats() {
+            statLines.textContent = fileStatsData.lines.toLocaleString();
+            statWords.textContent = fileStatsData.words.toLocaleString();
+            statChars.textContent = fileStatsData.chars.toLocaleString();
+            statSize.textContent = `${(fileStatsData.size / 1024).toFixed(2)} KB`;
+            
+            fileStats.style.display = 'grid';
+        }
+
+        // Обработка загрузки файла с индикацией прогресса
+        function handleFile(file) {
+            if (file.type !== 'text/plain' && !file.name.endsWith('.txt')) {
+                alert('Пожалуйста, выберите текстовый файл (.txt)');
+                return;
+            }
+
+            // Показываем индикатор загрузки
+            loadingIndicator.style.display = 'flex';
+            loadingText.textContent = 'Анализ файла...';
+            
+            fileInfo.innerHTML = `<i class="fas fa-file-alt"></i> <strong>${file.name}</strong> (${(file.size / 1024).toFixed(2)} KB)`;
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                fileContent = e.target.result;
+                
+                // Анализируем файл для сбора статистики
+                analyzeFile(fileContent, file.name, file.size);
+                
+                // Скрываем индикатор загрузки
+                setTimeout(() => {
+                    loadingIndicator.style.display = 'none';
+                    scannedLine.textContent = '';
+                }, 100);
+                
+                searchBtn.disabled = false;
+                searchInput.focus();
+                
+                // Показываем краткую информацию о файле
+                fileInfo.innerHTML += `<br><span style="color: #00ccff;">Файл успешно загружен и проанализирован</span>`;
+            };
+            
+            reader.onerror = function() {
+                loadingIndicator.style.display = 'none';
+                alert('Ошибка при чтении файла');
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Поиск слова в тексте
+        function searchInText() {
+            const searchTerm = searchInput.value.trim();
+            
+            if (!fileContent) {
+                alert('Сначала загрузите файл');
+                return;
+            }
+            
+            if (!searchTerm) {
+                alert('Введите слово для поиска');
+                return;
+            }
+            
+            // Замер времени поиска
+            const startTime = performance.now();
+            
+            // Очищаем предыдущие результаты
+            searchResults = [];
+            resultsContainer.innerHTML = '';
+            
+            // Разделяем текст на строки
+            const lines = fileContent.split('\n');
+            let totalMatches = 0;
+            
+            // Ищем в каждой строке
+            for (let i = 0; i < lines.length; i++) {
+                const lineNumber = i + 1;
+                const lineText = lines[i].trim();
+                
+                // Используем регулярное выражение для поиска всех вхождений
+                const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                const matches = lineText.match(regex);
+                
+                if (matches) {
+                    totalMatches += matches.length;
+                    searchResults.push({
+                        line: lineNumber,
+                        text: lineText,
+                        searchTerm: searchTerm,
+                        matchesCount: matches.length
+                    });
+                }
+            }
+            
+            // Замер времени окончания поиска
+            const endTime = performance.now();
+            const elapsedTime = (endTime - startTime).toFixed(2);
+            
+            // Отображаем результаты
+            displayResults();
+            
+            // Обновляем статистику поиска
+            searchTime.textContent = `Время: ${elapsedTime} мс`;
+            matchesCount.textContent = `Совпадений: ${totalMatches}`;
+            
+            // Активируем кнопку экспорта, если есть результаты
+            exportBtn.disabled = searchResults.length === 0;
+        }
+
+        // Отображение результатов
+        function displayResults() {
+            resultsCount.textContent = `Найдено: ${searchResults.length} строк`;
+            
+            if (searchResults.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="empty-results">
+                        <i class="fas fa-search-minus" style="font-size: 3rem; margin-bottom: 15px; color: #444;"></i>
+                        <p>Совпадений не найдено</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let resultsHTML = '';
+            
+            for (let i = 0; i < searchResults.length; i++) {
+                const result = searchResults[i];
+                
+                // Экранируем специальные символы для безопасного использования в регулярном выражении
+                const escapedTerm = result.searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`(${escapedTerm})`, 'gi');
+                const highlightedText = result.text.replace(regex, '<span class="highlight">$1</span>');
+                
+                resultsHTML += `
+                    <div class="result-item">
+                        <div class="result-line">
+                            <span class="result-number">Строка ${result.line}:</span>
+                            ${highlightedText}
+                        </div>
+                        <div style="font-size: 0.85rem; color: #00ccff;">
+                            <i class="fas fa-bullseye"></i> Найдено совпадений: ${result.matchesCount}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultsContainer.innerHTML = resultsHTML;
+            
+            // Прокручиваем к началу результатов
+            resultsContainer.scrollTop = 0;
+        }
+
+        // Экспорт результатов в файл
+        function exportResults() {
+            if (searchResults.length === 0) {
+                alert('Нет результатов для экспорта');
+                return;
+            }
+            
+            let totalMatches = 0;
+            for (let i = 0; i < searchResults.length; i++) {
+                totalMatches += searchResults[i].matchesCount;
+            }
+            
+            let exportContent = `========================================\n`;
+            exportContent += `АНАЛИЗ ТЕКСТОВОГО ФАЙЛА\n`;
+            exportContent += `========================================\n\n`;
+            exportContent += `Дата анализа: ${new Date().toLocaleString()}\n`;
+            exportContent += `Имя файла: ${fileStatsData.fileName}\n`;
+            exportContent += `Искомое слово/фраза: "${searchInput.value.trim()}"\n`;
+            exportContent += `Всего строк в файле: ${fileStatsData.lines}\n`;
+            exportContent += `Всего слов в файле: ${fileStatsData.words}\n`;
+            exportContent += `Всего символов в файле: ${fileStatsData.chars}\n`;
+            exportContent += `Размер файла: ${(fileStatsData.size / 1024).toFixed(2)} KB\n`;
+            exportContent += `Время анализа файла: ${fileStatsData.loadTime}\n\n`;
+            exportContent += `========================================\n`;
+            exportContent += `РЕЗУЛЬТАТЫ ПОИСКА\n`;
+            exportContent += `========================================\n\n`;
+            exportContent += `Найдено строк с совпадениями: ${searchResults.length}\n`;
+            exportContent += `Общее количество совпадений: ${totalMatches}\n\n`;
+            
+            for (let i = 0; i < searchResults.length; i++) {
+                const result = searchResults[i];
+                exportContent += `--- Строка ${result.line} (совпадений: ${result.matchesCount}) ---\n`;
+                exportContent += `${result.text}\n\n`;
+            }
+            
+            exportContent += `========================================\n`;
+            exportContent += `КОНЕЦ ОТЧЕТА\n`;
+            exportContent += `========================================\n`;
+            
+            // Создаем Blob и ссылку для скачивания
+            const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `analysis_${searchInput.value.trim().substring(0, 20)}_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Обработчики событий
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                handleFile(this.files[0]);
+            }
+        });
+
+        dropArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('dragover');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('dragover');
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        searchBtn.addEventListener('click', searchInText);
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchInText();
+            }
+        });
+
+        exportBtn.addEventListener('click', exportResults);
+
+        // Инициализация снежинок
+        createSnowflakes();
+    </script>
+</body>
+</html>
