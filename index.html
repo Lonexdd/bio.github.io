@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lonex Scan</title>
+    <title>Анализатор текстовых файлов</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         * {
@@ -242,7 +242,55 @@
             box-shadow: 0 0 20px rgba(0, 102, 255, 0.5);
         }
 
-        /* Новый дизайн кнопок: синий фон без обводки со свечением */
+        /* Кнопки быстрого поиска */
+        .quick-search-title {
+            font-size: 1.2rem;
+            color: #ff5555;
+            margin: 20px 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quick-search-title i {
+            color: #ff5555;
+        }
+
+        .quick-search-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .quick-btn {
+            background-color: rgba(255, 85, 85, 0.1);
+            color: #ff9999;
+            border: 1px dashed #ff5555;
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-align: center;
+            transition: all 0.3s;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .quick-btn:hover {
+            background-color: rgba(255, 85, 85, 0.2);
+            border: 1px solid #ff5555;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 85, 85, 0.3);
+            color: #ffffff;
+        }
+
+        .quick-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Основные кнопки */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -464,8 +512,8 @@
                 font-size: 2.2rem;
             }
             
-            .buttons {
-                flex-direction: column;
+            .buttons, .quick-search-buttons {
+                grid-template-columns: 1fr;
             }
             
             .btn {
@@ -480,6 +528,16 @@
             .file-stats {
                 grid-template-columns: 1fr;
             }
+            
+            .quick-search-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .quick-search-buttons {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
     <!-- Иконочный шрифт для иконок -->
@@ -491,7 +549,7 @@
 
     <div class="container">
         <header>
-            <h1>Lonex Scan</h1>
+            <h1>Анализатор текстовых файлов</h1>
             <p class="subtitle">Загрузите текстовый файл, проанализируйте его содержимое и найдите нужные слова</p>
         </header>
 
@@ -512,7 +570,7 @@
                         Перетащите файл сюда или кликните для выбора
                     </label>
                     <input type="file" id="fileInput" accept=".txt" style="display: none;">
-                    <p style="color: #888; margin-top: 15px;">t.me/scanceo</p>
+                    <p style="color: #888; margin-top: 15px;">Поддерживаются только .txt файлы</p>
                 </div>
                 <div class="file-info" id="fileInfo">
                     Файл не выбран
@@ -536,6 +594,15 @@
                 <div class="search-box">
                     <input type="text" id="searchInput" class="search-input" placeholder="Введите слово или фразу для поиска...">
                 </div>
+                
+                <!-- Кнопки быстрого поиска -->
+                <div class="quick-search-title">
+                    <i class="fas fa-bolt"></i> Быстрый поиск
+                </div>
+                <div class="quick-search-buttons" id="quickSearchButtons">
+                    <!-- Кнопки будут добавлены через JavaScript -->
+                </div>
+                
                 <div class="buttons">
                     <button id="searchBtn" class="btn" disabled>
                         <i class="fas fa-search"></i> Найти слово
@@ -609,7 +676,7 @@
         </section>
 
         <footer>
-            <p>Сайт был сделан для себя но мб кому то поможет в поисках логов PS: Lonex</p>
+            <p>Анализатор текстовых файлов &copy; 2023 | Минималистичный дизайн с темной темой и анимацией снежинок</p>
         </footer>
     </div>
 
@@ -629,6 +696,7 @@
         const resultsCount = document.getElementById('resultsCount');
         const searchTime = document.getElementById('searchTime');
         const matchesCount = document.getElementById('matchesCount');
+        const quickSearchButtons = document.getElementById('quickSearchButtons');
         
         // Элементы статистики (только строки и размер)
         const statLines = document.getElementById('statLines');
@@ -650,6 +718,16 @@
             fileName: '',
             loadTime: ''
         };
+
+        // Слова для быстрого поиска
+        const quickSearchWords = [
+            '0xcheats.net',
+            'leet-cheats.ru',
+            'vanish-cheat.com',
+            'nfcheats.com',
+            'neverlose.cc',
+            'nixware.cc',
+        ];
 
         // Создание снежинок
         function createSnowflakes() {
@@ -725,6 +803,32 @@
                     snowflakesContainer.removeChild(snowflake);
                 }
             }, (duration + 5) * 1000);
+        }
+
+        // Создание кнопок быстрого поиска
+        function createQuickSearchButtons() {
+            quickSearchButtons.innerHTML = '';
+            
+            quickSearchWords.forEach(word => {
+                const button = document.createElement('button');
+                button.className = 'quick-btn';
+                button.textContent = word;
+                button.title = `Нажмите для поиска: ${word}`;
+                
+                button.addEventListener('click', () => {
+                    searchInput.value = word;
+                    searchInput.focus();
+                    
+                    // Автоматически запускаем поиск, если файл загружен
+                    if (fileContent) {
+                        setTimeout(() => {
+                            searchInText();
+                        }, 100);
+                    }
+                });
+                
+                quickSearchButtons.appendChild(button);
+            });
         }
 
         // Обновление панели информации о файле
@@ -1007,8 +1111,14 @@
 
         exportBtn.addEventListener('click', exportResults);
 
-        // Инициализация снежинок
-        createSnowflakes();
+        // Инициализация
+        function init() {
+            createSnowflakes();
+            createQuickSearchButtons();
+        }
+
+        // Запуск инициализации при загрузке страницы
+        init();
     </script>
 </body>
 </html>
