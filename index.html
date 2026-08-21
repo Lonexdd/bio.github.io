@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-ru="odyssey — сайты и Telegram-разработка" data-en="odyssey — web &amp; Telegram development">odyssey — сайты и Telegram-разработка</title>
+<meta name="description" content="Сайты-визитки, Telegram-боты и мини-приложения.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<!-- анимации появления включаются, только если JS жив -->
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+
+<!-- ─── курсор ─────────────────────────────────────────── -->
+<div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+<!-- ─── фон ────────────────────────────────────────────── -->
+<div class="bg" aria-hidden="true">
+  <div class="bg__image"></div>
+  <div class="bg__veil"></div>
+  <div class="bg__grain"></div>
+</div>
+
+<!-- полоса прогресса скролла -->
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<!-- ─── шапка ──────────────────────────────────────────── -->
+<header class="header" id="header">
+  <a href="#home" class="logo" data-cursor="link">
+    <span class="logo__mark"></span>
+    <span class="logo__text">odyssey</span>
+  </a>
+
+  <nav class="nav" id="nav">
+    <a href="#about"    data-ru="О себе"   data-en="About"    data-cursor="link">О себе</a>
+    <a href="#services" data-ru="Услуги"   data-en="Services" data-cursor="link">Услуги</a>
+    <a href="#process"  data-ru="Процесс"  data-en="Process"  data-cursor="link">Процесс</a>
+    <a href="#contact"  data-ru="Контакты" data-en="Contact"  data-cursor="link">Контакты</a>
+  </nav>
+
+  <div class="header__right">
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" class="lang__btn is-active" data-lang="ru" data-cursor="link">RU</button>
+      <span class="lang__sep">/</span>
+      <button type="button" class="lang__btn" data-lang="en" data-cursor="link">EN</button>
+    </div>
+    <button type="button" class="burger" id="burger" aria-label="Menu" aria-expanded="false" data-cursor="link">
+      <span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ─── HERO ─────────────────────────────────────────── -->
+  <section class="hero" id="home">
+    <div class="wrap">
+      <p class="eyebrow reveal" data-ru="Веб-разработчик" data-en="Web developer">Веб-разработчик</p>
+
+      <h1 class="hero__title reveal" data-split style="--d:.08s"
+          data-ru="Сайты-визитки,<br>Telegram-боты<br>и мини-приложения"
+          data-en="Business-card sites,<br>Telegram bots<br>and mini apps">Сайты-визитки,<br>Telegram-боты<br>и мини-приложения</h1>
+
+      <p class="hero__sub reveal" style="--d:.16s"
+         data-ru="Чисто, быстро, без лишнего. От идеи до запуска."
+         data-en="Clean, fast, no clutter. From idea to launch.">Чисто, быстро, без лишнего. От идеи до запуска.</p>
+
+      <div class="hero__actions reveal" style="--d:.24s">
+        <a href="#contact" class="btn btn--primary" data-cursor="link" data-ru="Обсудить проект" data-en="Discuss a project">Обсудить проект</a>
+        <a href="#services" class="btn" data-cursor="link" data-ru="Что я делаю" data-en="What I do">Что я делаю</a>
+      </div>
+    </div>
+
+    <div class="scroll-hint" aria-hidden="true">
+      <span class="scroll-hint__line"></span>
+      <span class="scroll-hint__text" data-ru="скролл" data-en="scroll">скролл</span>
+    </div>
+  </section>
+
+  <!-- ─── ABOUT ────────────────────────────────────────── -->
+  <section class="section" id="about">
+    <div class="wrap">
+      <p class="section__num reveal">01</p>
+      <div class="about">
+        <div class="about__text">
+          <h2 class="section__title reveal" data-split data-ru="О себе" data-en="About">О себе</h2>
+          <p class="reveal" style="--d:.06s"
+             data-ru="Делаю продукты, которые работают с первого дня: понятный интерфейс, быстрая загрузка, никакого визуального шума. Беру проект целиком — от структуры и текста до вёрстки, бэкенда и деплоя."
+             data-en="I build products that work from day one: a clear interface, fast load, no visual noise. I take the project end to end — structure and copy, front-end, back-end and deploy.">Делаю продукты, которые работают с первого дня: понятный интерфейс, быстрая загрузка, никакого визуального шума. Беру проект целиком — от структуры и текста до вёрстки, бэкенда и деплоя.</p>
+          <p class="reveal" style="--d:.12s"
+             data-ru="Основной фокус — экосистема Telegram: боты, мини-приложения и лендинги, которые их продают."
+             data-en="Main focus — the Telegram ecosystem: bots, mini apps and the landing pages that sell them.">Основной фокус — экосистема Telegram: боты, мини-приложения и лендинги, которые их продают.</p>
+        </div>
+
+        <div class="about__stack glass reveal" style="--d:.18s">
+          <p class="label" data-ru="Стек" data-en="Stack">Стек</p>
+          <ul class="stack">
+            <li>HTML / CSS / JavaScript</li>
+            <li>Python · aiogram</li>
+            <li>Node.js</li>
+            <li>Telegram Bot API</li>
+            <li>Telegram Web Apps</li>
+            <li>PostgreSQL · SQLite</li>
+            <li>Git · Docker</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SERVICES ─────────────────────────────────────── -->
+  <section class="section" id="services">
+    <div class="wrap">
+      <p class="section__num reveal">02</p>
+      <h2 class="section__title reveal" data-split data-ru="Услуги" data-en="Services">Услуги</h2>
+
+      <div class="cards">
+        <article class="card glass reveal" data-cursor="card">
+          <span class="card__idx">01</span>
+          <h3 data-ru="Сайты-визитки" data-en="Business-card sites">Сайты-визитки</h3>
+          <p data-ru="Одностраничные и небольшие многостраничные сайты. Адаптив под все экраны, аккуратные анимации, быстрая загрузка, базовое SEO."
+             data-en="One-pagers and small multi-page sites. Responsive on every screen, restrained animation, fast load, SEO basics.">Одностраничные и небольшие многостраничные сайты. Адаптив под все экраны, аккуратные анимации, быстрая загрузка, базовое SEO.</p>
+          <p class="card__meta" data-ru="от 3 дней" data-en="from 3 days">от 3 дней</p>
+        </article>
+
+        <article class="card glass reveal" style="--d:.08s" data-cursor="card">
+          <span class="card__idx">02</span>
+          <h3 data-ru="Telegram-боты" data-en="Telegram bots">Telegram-боты</h3>
+          <p data-ru="Боты для продаж, записи, поддержки и автоматизации рутины. Админ-панель, приём платежей, рассылки, интеграции с CRM и таблицами."
+             data-en="Bots for sales, booking, support and routine automation. Admin panel, payments, broadcasts, CRM and spreadsheet integrations.">Боты для продаж, записи, поддержки и автоматизации рутины. Админ-панель, приём платежей, рассылки, интеграции с CRM и таблицами.</p>
+          <p class="card__meta" data-ru="от 5 дней" data-en="from 5 days">от 5 дней</p>
+        </article>
+
+        <article class="card glass reveal" style="--d:.16s" data-cursor="card">
+          <span class="card__idx">03</span>
+          <h3 data-ru="Mini Apps" data-en="Mini Apps">Mini Apps</h3>
+          <p data-ru="Полноценные веб-приложения внутри Telegram: магазины, каталоги, личные кабинеты и сервисы записи с оплатой прямо в мессенджере."
+             data-en="Full web apps inside Telegram: shops, catalogs, user dashboards and booking services with payment right in the messenger.">Полноценные веб-приложения внутри Telegram: магазины, каталоги, личные кабинеты и сервисы записи с оплатой прямо в мессенджере.</p>
+          <p class="card__meta" data-ru="от 10 дней" data-en="from 10 days">от 10 дней</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PROCESS ──────────────────────────────────────── -->
+  <section class="section" id="process">
+    <div class="wrap">
+      <p class="section__num reveal">03</p>
+      <h2 class="section__title reveal" data-split data-ru="Как я работаю" data-en="How I work">Как я работаю</h2>
+
+      <ol class="process">
+        <li class="process__item reveal">
+          <span class="process__num">01</span>
+          <div class="process__body">
+            <h3 data-ru="Обсуждаем задачу" data-en="We talk it through">Обсуждаем задачу</h3>
+            <p data-ru="Пишете в Telegram — разбираюсь, что нужно, и задаю вопросы. Оценка и сроки бесплатно и без обязательств."
+               data-en="You message me on Telegram — I dig into what you need and ask questions. Estimate and timeline are free, no strings attached.">Пишете в Telegram — разбираюсь, что нужно, и задаю вопросы. Оценка и сроки бесплатно и без обязательств.</p>
+          </div>
+        </li>
+
+        <li class="process__item reveal" style="--d:.06s">
+          <span class="process__num">02</span>
+          <div class="process__body">
+            <h3 data-ru="Структура и смета" data-en="Structure and quote">Структура и смета</h3>
+            <p data-ru="Собираю структуру экранов или сценарий бота, согласовываем. После этого цена и срок фиксируются и дальше не растут."
+               data-en="I lay out the screens or the bot flow and we agree on it. After that the price and deadline are fixed and do not creep.">Собираю структуру экранов или сценарий бота, согласовываем. После этого цена и срок фиксируются и дальше не растут.</p>
+          </div>
+        </li>
+
+        <li class="process__item reveal" style="--d:.12s">
+          <span class="process__num">03</span>
+          <div class="process__body">
+            <h3 data-ru="Разработка" data-en="Build">Разработка</h3>
+            <p data-ru="Показываю промежуточные версии, а не готовый результат в конце. Правки вносим по ходу, пока это дёшево."
+               data-en="I show work in progress instead of dropping a finished result at the end. Changes happen along the way, while they are still cheap.">Показываю промежуточные версии, а не готовый результат в конце. Правки вносим по ходу, пока это дёшево.</p>
+          </div>
+        </li>
+
+        <li class="process__item reveal" style="--d:.18s">
+          <span class="process__num">04</span>
+          <div class="process__body">
+            <h3 data-ru="Запуск" data-en="Launch">Запуск</h3>
+            <p data-ru="Выкладываю на хостинг, подключаю домен, отдаю все доступы и исходники. Две недели правок после сдачи — бесплатно."
+               data-en="I deploy it, connect the domain and hand over every access and the source. Two weeks of fixes after delivery are free.">Выкладываю на хостинг, подключаю домен, отдаю все доступы и исходники. Две недели правок после сдачи — бесплатно.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ─── CONTACT ──────────────────────────────────────── -->
+  <section class="section section--contact" id="contact">
+    <div class="wrap">
+      <p class="section__num reveal">04</p>
+      <div class="contact glass reveal">
+        <h2 class="contact__title" data-split
+            data-ru="Расскажите, что нужно сделать" data-en="Tell me what you need">Расскажите, что нужно сделать</h2>
+        <p class="contact__sub"
+           data-ru="Отвечаю в течение дня. Оценка и сроки — бесплатно."
+           data-en="I reply within a day. Estimate and timeline are free.">Отвечаю в течение дня. Оценка и сроки — бесплатно.</p>
+
+        <a class="contact__tg" href="https://t.me/owncheats" target="_blank" rel="noopener" data-cursor="link">
+          <span class="label">Telegram</span>
+          <span class="contact__tg-handle">@owncheats</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <span>© <span id="year">2026</span> odyssey</span>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
